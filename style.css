@@ -1,0 +1,39 @@
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+.nav{
+    height: 80px;   
+    width: 100%;
+    background: gray;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 30px 0 30px;
+}
+.links{     
+    display: flex;
+    font-family: tahoma;
+    font-size: 20px;
+    flex-direction: column;
+}
+
+.links a{
+    color: black;
+    text-decoration: none;
+}
+
+
+.note {
+    background-color: aqua;
+    padding: 10px;
+    width: 40%;
+}
+
+.note span{
+    color: pink;
+}
+.button{
+    background-color: skyblue;
+}
