@@ -1,39 +1,305 @@
+/* ===========================================
+   PAGE VISIBILITY CONTROL
+   
+.page = hidden by default
+.page.active = visible (shows the page)=========================================== */
+.page {
+  display: none;
+}
+.page.active {
+  display: block;
+}
+
+/* ===========================================
+   NAVIGATION VISIBILITY CONTROL
+   
+Show different nav based on login state=========================================== */
+
+/* When NOT logged in: show login nav, hide admin nav*/
+body.not-authenticated .nav-not-loggedin {
+  display: flex;
+}
+body.not-authenticated .nav-admin {
+  display: none;
+}
+
+/*When logged in: hide login nav, show admin nav*/
+body.authenticated .nav-not-loggedin {
+  display: none;
+}
+body.authenticated .nav-admin {
+  display: flex;
+}
+
+/* ===========================================
+   ROLE-BASED VISIBILITY CONTROL
+   
+Show different content based on user role=========================================== */
+body.not-authenticated .role-logged-in {
+  display: none;
+}
+body.authenticated .role-logged-out {
+  display: none;
+}
+.role-admin {
+  display: none;
+}
+body.is-admin .role-admin {
+  display: block;
+}
+
+
 *{
     padding: 0;
     margin: 0;
     box-sizing: border-box;
 }
-.nav{
+.logo{
     height: 80px;   
     width: 100%;
-    background: gray;
+    background: black;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0 30px 0 30px;
+    color: white;
 }
-.links{     
-    display: flex;
-    font-family: tahoma;
-    font-size: 20px;
+
+.logo h1{
+    font-family: sans-serif;
+    font-size: 25px;
+}
+
+.links{    
+    display: flex; 
+    font-family: sans-serif;
+    font-size: 15px;
     flex-direction: column;
 }
 
 .links a{
-    color: black;
+    color: gray;
     text-decoration: none;
 }
 
 
 .note {
-    background-color: aqua;
+    background-color: #B6E2F7;
     padding: 10px;
     width: 40%;
+    font-family: sans-serif;
 }
 
 .note span{
-    color: pink;
+    color: rgb(243, 72, 100);
+    font-weight: bold;
 }
 .button{
-    background-color: skyblue;
+    background-color: rgb(0, 91, 249);
+    padding: 5px;
+    color: rgb(255, 255, 255);
+    font-family: sans-serif;
+    border: none;
+    border-radius: 8px;
+    height: 40px;
+}
+
+/* ===========================================
+   ADD/EDIT FORM STYLING
+   Centered at bottom, wider width=========================================== */
+.addedit {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px 30px;
+    margin: 30px auto;
+    width: calc(100% - 60px);
+    max-width: 100%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.addedit-header {
+    font-size: 20px;
+    font-weight: bold;
+    font-family: sans-serif;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #007bff;
+    color: #333;
+}
+
+.addedit form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.input-dsgn {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.input-dsgn label {
+    font-family: sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 5px;
+    color: #555;
+}
+
+.input-dsgn input {
+    padding: 10px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+}
+
+.input-dsgn input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+}
+
+.addedit .actions {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #dee2e6;
+}
+
+.addedit .actions button {
+    min-width: 120px;
+}
+
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 5px;
+}
+
+.checkbox-wrapper input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.checkbox-wrapper label {
+    font-family: sans-serif;
+    font-size: 14px;
+    color: #555;
+    cursor: pointer;
+}
+
+/* ===========================================
+   HEADER SECTION STYLING
+   For Employees and Accounts headers=========================================== */
+.bulagon {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 30px;
+    background-color: #fff;
+}
+
+.bulagon h1 {
+    font-family: sans-serif;
+    font-size: 28px;
+    color: #333;
+    margin: 0;
+}
+
+.flexMe {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 30px;
+    background-color: #fff;
+}
+
+.flexMe h1 {
+    font-family: sans-serif;
+    font-size: 28px;
+    color: #333;
+    margin: 0;
+}
+
+/* ===========================================
+   PROFILE PAGE STYLING
+   Left-aligned content with bordered container=========================================== */
+#profile-page .container {
+    text-align: left;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 30px;
+    background-color: #f8f9fa;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+#profile-page h2 {
+    text-align: left;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #007bff;
+}
+
+#profile-content {
+    text-align: left;
+}
+
+#profile-edit {
+    text-align: left;
+}
+
+/* ===========================================
+   VERIFIED STATUS STYLING
+   Green check and red X for verified column=========================================== */
+.verified-check {
+    display: inline-block;
+    background-color: #d4edda;
+    color: green;
+    font-weight: bold;
+    font-size: 16px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: 1px solid #c3e6cb;
+}
+
+.verified-x {
+    display: inline-block;
+    background-color: #f8d7da;
+    color: red;
+    font-weight: bold;
+    font-size: 16px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: 1px solid #f5c6cb;
+}
+
+/* ===========================================
+   DROPDOWN BUTTON STYLING
+   Remove default button colors, use background only=========================================== */
+.nav-admin .dropdown-toggle {
+    background-color: transparent;
+    border: none;
+    color: white;
+    font-family: sans-serif;
+    font-size: 15px;
+    padding: 8px 12px;
+}
+
+.nav-admin .dropdown-toggle:hover,
+.nav-admin .dropdown-toggle:focus {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.nav-admin .dropdown-toggle::after {
+    margin-left: 8px;
 }
