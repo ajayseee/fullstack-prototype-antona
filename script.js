@@ -143,6 +143,25 @@ function handleRouting() {
     page = document.getElementById("home-page");
   }
 
+  // Clear form fields when navigating to login or register pages
+  if (pageName === "login") {
+    const loginEmail = document.getElementById("login-email");
+    const loginPassword = document.getElementById("login-password");
+    if (loginEmail) loginEmail.value = "";
+    if (loginPassword) loginPassword.value = "";
+  }
+  
+  if (pageName === "register") {
+    const regFirstname = document.getElementById("reg-firstname");
+    const regLastname = document.getElementById("reg-lastname");
+    const regEmail = document.getElementById("reg-email");
+    const regPassword = document.getElementById("reg-password");
+    if (regFirstname) regFirstname.value = "";
+    if (regLastname) regLastname.value = "";
+    if (regEmail) regEmail.value = "";
+    if (regPassword) regPassword.value = "";
+  }
+
   // Handle verified message visibility
   // Only show "Email verified" message right after verification
   const verifiedMessage = document.getElementById("verified-message");
@@ -272,6 +291,10 @@ function handleLogin() {
     // Save a fake "auth token" (just the email)
     localStorage.setItem("auth_token", user.email);
     
+    // Clear login form fields
+    document.getElementById("login-email").value = "";
+    document.getElementById("login-password").value = "";
+    
     // Update the UI state
     setAuthState(true, user);
     
@@ -329,6 +352,12 @@ function handleRegister() {
   // Add to database
   window.db.accounts.push(newUser);
   saveToStorage();
+
+  // Clear register form fields
+  document.getElementById("reg-firstname").value = "";
+  document.getElementById("reg-lastname").value = "";
+  document.getElementById("reg-email").value = "";
+  document.getElementById("reg-password").value = "";
 
   // Store email in localStorage.unverified_email
   localStorage.setItem("unverified_email", email);
@@ -1094,26 +1123,19 @@ function deleteEmployee(index) {
 
 // Render requests table
 function renderRequestsTable() {
-    console.log("renderRequestsTable called");
     const container = document.querySelector("#requests-page .requests");
     if (!container) {
-        console.log("Container not found");
         return;
     }
     
     // Check if user is logged in
     if (!currentUser) {
-        console.log("No current user");
         container.innerHTML = '<p>Please log in to view your requests.</p>';
         return;
     }
     
-    console.log("Current user email:", currentUser.email);
-    console.log("All requests:", window.db.requests);
-    
     // Filter requests for current user
     const userRequests = window.db.requests.filter(r => r.employeeEmail === currentUser.email);
-    console.log("User requests:", userRequests);
     
     // Find the paragraph, create button, and table
     let table = container.querySelector("table");
@@ -1222,8 +1244,6 @@ function resetRequestForm() {
 
 // Submit request
 function submitRequest() {
-    console.log("submitRequest called");
-    
     // Check if user is logged in
     if (!currentUser) {
         alert("Please log in to submit a request");
@@ -1231,7 +1251,6 @@ function submitRequest() {
     }
     
     const type = document.getElementById("request-type").value;
-    console.log("Request type:", type);
     
     if (!type) {
         alert("Please select a request type");
@@ -1253,8 +1272,6 @@ function submitRequest() {
         }
     });
     
-    console.log("Items:", items);
-    
     if (items.length === 0) {
         alert("Please add at least one item with a name");
         return;
@@ -1271,8 +1288,6 @@ function submitRequest() {
         employeeEmail: currentUser.email
     };
     
-    console.log("New request:", newRequest);
-    
     // Ensure requests array exists
     if (!window.db.requests) {
         window.db.requests = [];
@@ -1280,8 +1295,6 @@ function submitRequest() {
     
     window.db.requests.push(newRequest);
     saveToStorage();
-    
-    console.log("All requests:", window.db.requests);
     
     // Close modal
     const modalElement = document.getElementById("exampleModal");
@@ -1305,7 +1318,6 @@ function submitRequest() {
     resetRequestForm();
     
     // Render the table
-    console.log("Rendering requests table...");
     renderRequestsTable();
     
     alert("Request submitted successfully!");
