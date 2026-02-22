@@ -24,6 +24,11 @@ function loadFromStorage() {
     // If data exists, parse it from JSON string to object
     try {
       window.db = JSON.parse(rawData);
+      // Ensure all required arrays exist
+      if (!window.db.accounts) window.db.accounts = [];
+      if (!window.db.departments) window.db.departments = [];
+      if (!window.db.employees) window.db.employees = [];
+      if (!window.db.requests) window.db.requests = [];
     } catch (e) {
       // If data is corrupt, seed with default data
       seedDefaultData();
@@ -232,8 +237,13 @@ function setAuthState(isLoggedIn, user = null) {
 
   // Update navigation to show username
   const navUsername = document.getElementById("nav-username");
-  if (navUsername && user) {
-    navUsername.innerText = user.firstName;
+  if (navUsername) {
+    if (user) {
+      navUsername.innerText = user.firstName;
+    } else {
+      // Clear username when logging out
+      navUsername.innerText = "User";
+    }
   }
 }
 
@@ -480,7 +490,13 @@ function setupButtonHandlers() {
   if (newReqBtn) {
     newReqBtn.onclick = function() {
       resetRequestForm();
-      new bootstrap.Modal(document.getElementById("exampleModal")).show();
+      const modalElement = document.getElementById("exampleModal");
+      const existingModal = bootstrap.Modal.getInstance(modalElement);
+      if (existingModal) {
+        existingModal.show();
+      } else {
+        new bootstrap.Modal(modalElement).show();
+      }
     };
   }
   
@@ -488,7 +504,13 @@ function setupButtonHandlers() {
   if (createReqBtn) {
     createReqBtn.onclick = function() {
       resetRequestForm();
-      new bootstrap.Modal(document.getElementById("exampleModal")).show();
+      const modalElement = document.getElementById("exampleModal");
+      const existingModal = bootstrap.Modal.getInstance(modalElement);
+      if (existingModal) {
+        existingModal.show();
+      } else {
+        new bootstrap.Modal(modalElement).show();
+      }
     };
   }
 
@@ -916,7 +938,8 @@ function renderEmployeesTable() {
     
     window.db.employees.forEach((emp, index) => {
         const dept = window.db.departments.find(d => d.id == emp.departmentId);
-        const deptName = dept ? dept.name : "N/A";
+        // Only show Engineering or HR, filter out invalid departments
+        const deptName = (dept && (dept.name === "Engineering" || dept.name === "HR")) ? dept.name : "";
         
         const row = document.createElement("tr");
         row.innerHTML = `
@@ -936,13 +959,19 @@ function renderEmployeesTable() {
 // Variable to track if we're editing an employee
 let editingEmployeeIndex = -1;
 
-// Populate department dropdown
+// Populate department dropdown with only Engineering and HR
 function populateDepartmentDropdown() {
     const select = document.querySelector("#employees-page #department");
     if (!select) return;
     
-    select.innerHTML = "";
-    window.db.departments.forEach(dept => {
+    select.innerHTML = '<option value="">Select department...</option>';
+    
+    // Only show Engineering and HR departments
+    const allowedDepts = window.db.departments.filter(dept => 
+        dept.name === "Engineering" || dept.name === "HR"
+    );
+    
+    allowedDepts.forEach(dept => {
         const option = document.createElement("option");
         option.value = dept.id;
         option.textContent = dept.name;
@@ -982,12 +1011,24 @@ function saveEmployee() {
     const id = document.querySelector("#employees-page #empid").value;
     const email = document.querySelector("#employees-page #emp-email").value;
     const position = document.querySelector("#employees-page #position").value;
-    const departmentId = parseInt(document.querySelector("#employees-page #department").value);
+    const departmentId = document.querySelector("#employees-page #department").value;
     const hireDate = document.querySelector("#employees-page #date").value;
     
     // Validate
     if (!id || !email || !position) {
         alert("Employee ID, Email, and Position are required");
+        return;
+    }
+    
+    // Validate department selection - must be Engineering or HR
+    if (!departmentId) {
+        alert("Please select a department (Engineering or HR)");
+        return;
+    }
+    
+    const selectedDept = window.db.departments.find(d => d.id == departmentId);
+    if (!selectedDept || (selectedDept.name !== "Engineering" && selectedDept.name !== "HR")) {
+        alert("Department must be Engineering or HR");
         return;
     }
     
@@ -1053,11 +1094,26 @@ function deleteEmployee(index) {
 
 // Render requests table
 function renderRequestsTable() {
+    console.log("renderRequestsTable called");
     const container = document.querySelector("#requests-page .requests");
-    if (!container) return;
+    if (!container) {
+        console.log("Container not found");
+        return;
+    }
+    
+    // Check if user is logged in
+    if (!currentUser) {
+        console.log("No current user");
+        container.innerHTML = '<p>Please log in to view your requests.</p>';
+        return;
+    }
+    
+    console.log("Current user email:", currentUser.email);
+    console.log("All requests:", window.db.requests);
     
     // Filter requests for current user
     const userRequests = window.db.requests.filter(r => r.employeeEmail === currentUser.email);
+    console.log("User requests:", userRequests);
     
     // Find the paragraph, create button, and table
     let table = container.querySelector("table");
@@ -1083,8 +1139,8 @@ function renderRequestsTable() {
                 <tr>
                     <th>Type</th>
                     <th>Items</th>
-                    <th>Status</th>
                     <th>Date</th>
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -1096,17 +1152,23 @@ function renderRequestsTable() {
     tbody.innerHTML = "";
     
     userRequests.forEach(req => {
-        const statusClass = req.status === "Pending" ? "warning" : 
-                           req.status === "Approved" ? "success" : "danger";
+        // Status colors: Pending=yellow(warning), Approved=green(success), Rejected=red(danger)
+        let statusClass = "warning"; // default yellow for Pending
+        if (req.status === "Approved") {
+            statusClass = "success"; // green
+        } else if (req.status === "Rejected") {
+            statusClass = "danger"; // red
+        }
         
         const itemsList = req.items.map(i => `${i.name} (${i.qty})`).join(", ");
         
         const row = document.createElement("tr");
+        // Columns: Type, Items, Date, Status
         row.innerHTML = `
             <td>${req.type}</td>
             <td>${itemsList}</td>
-            <td><span class="badge bg-${statusClass}">${req.status}</span></td>
             <td>${req.date}</td>
+            <td><span class="badge bg-${statusClass}">${req.status}</span></td>
         `;
         tbody.appendChild(row);
     });
@@ -1140,22 +1202,36 @@ function removeRequestItem(btn) {
 // Reset request form
 function resetRequestForm() {
     // Reset type dropdown
-    document.getElementById("request-type").value = "";
+    const typeSelect = document.getElementById("request-type");
+    if (typeSelect) {
+        typeSelect.value = "";
+    }
     
     // Reset items container to single empty item
     const container = document.getElementById("request-items-container");
-    container.innerHTML = `
-        <div class="input-group mb-2">
-            <input type="text" class="form-control item-name" placeholder="Item name">
-            <input type="number" class="form-control item-qty" value="1" min="1" style="max-width: 80px;">
-            <button class="btn btn-outline-danger" type="button" onclick="removeRequestItem(this)">×</button>
-        </div>
-    `;
+    if (container) {
+        container.innerHTML = `
+            <div class="input-group mb-2">
+                <input type="text" class="form-control item-name" placeholder="Item name">
+                <input type="number" class="form-control item-qty" value="1" min="1" style="max-width: 80px;">
+                <button class="btn btn-outline-danger" type="button" onclick="removeRequestItem(this)">×</button>
+            </div>
+        `;
+    }
 }
 
 // Submit request
 function submitRequest() {
+    console.log("submitRequest called");
+    
+    // Check if user is logged in
+    if (!currentUser) {
+        alert("Please log in to submit a request");
+        return;
+    }
+    
     const type = document.getElementById("request-type").value;
+    console.log("Request type:", type);
     
     if (!type) {
         alert("Please select a request type");
@@ -1177,6 +1253,8 @@ function submitRequest() {
         }
     });
     
+    console.log("Items:", items);
+    
     if (items.length === 0) {
         alert("Please add at least one item with a name");
         return;
@@ -1185,23 +1263,50 @@ function submitRequest() {
     // Create request
     const today = new Date().toISOString().split('T')[0];
     
-    window.db.requests.push({
+    const newRequest = {
         type,
         items,
         status: "Pending",
         date: today,
         employeeEmail: currentUser.email
-    });
+    };
     
+    console.log("New request:", newRequest);
+    
+    // Ensure requests array exists
+    if (!window.db.requests) {
+        window.db.requests = [];
+    }
+    
+    window.db.requests.push(newRequest);
     saveToStorage();
-    renderRequestsTable();
     
-    // Close modal and reset form
-    const modal = bootstrap.Modal.getInstance(document.getElementById("exampleModal"));
-    modal.hide();
+    console.log("All requests:", window.db.requests);
+    
+    // Close modal
+    const modalElement = document.getElementById("exampleModal");
+    if (modalElement) {
+        // Try Bootstrap's modal API first
+        const bsModal = bootstrap.Modal.getInstance(modalElement);
+        if (bsModal) {
+            bsModal.hide();
+        }
+        // Fallback: manually hide modal
+        modalElement.classList.remove('show');
+        modalElement.style.display = 'none';
+        modalElement.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+        // Remove backdrop
+        const backdrops = document.querySelectorAll('.modal-backdrop');
+        backdrops.forEach(backdrop => backdrop.remove());
+    }
     
     // Reset form
     resetRequestForm();
+    
+    // Render the table
+    console.log("Rendering requests table...");
+    renderRequestsTable();
     
     alert("Request submitted successfully!");
 }
